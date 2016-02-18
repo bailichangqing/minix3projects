@@ -8,7 +8,9 @@ int main()
 {
   int fd;
 
-  char* const param[] = {"/bin/ls", NULL};
+  char* param[2];
+  param[1] = NULL;
+  param[0] = "/bin/ls";
 
   fd = open("outfile", O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
 
@@ -28,7 +30,8 @@ int main()
 
       close(fd);
 
-      execvp("ls", param);
+      execv("cat",param);
+      printf("failed");
   }
   else {
       wait(NULL);
