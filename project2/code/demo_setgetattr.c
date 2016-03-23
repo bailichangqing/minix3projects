@@ -8,16 +8,13 @@ int main(int argc,char** argv)
 {
 
   mq_attr_t attr;
-  attr.mm = 128;
-  attr.sb = 1;
-  attr.rb = 1;
+  attr_set(&attr,128,1,1);
   mqd_t mqd  = mq_open("haha",&attr);
-  attr.sb = 0;
-  attr.rb = 0;
+  attr_set(&attr,0,0,0);
   mq_setattr(mqd,&attr);
-  attr.sb = 1;
-  attr.rb = 1;
+  attr_set(&attr,1,1,1);
   mq_getattr(mqd,&attr);
-  printf("sb:%d rb:%d\n",attr.sb,attr.rb);
+  printf("mm :%d sb:%d rb:%d\n",attr.mm,attr.sb,attr.rb);
   close(mqd);
+  return 0;
 }

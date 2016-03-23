@@ -151,10 +151,11 @@ void notify_helper(int mqd,message_t* msg)
     {
       if((*msg).receivers[mi] == mqs[mqd].notify_pids[qi].pid)
       {
-        if(sys_kill(mqs[mqd].notify_pids[qi].pid,mqs[mqd].notify_pids[qi].sig) < 0) //fail to send signal
+        if(sys_kill(mqs[mqd].notify_pids[qi].receiver,mqs[mqd].notify_pids[qi].sig) < 0) //fail to send signal
         {
           printf("fails to send sig:%d to receiver:%d\n",mqs[mqd].notify_pids[qi].sig,mqs[mqd].notify_pids[qi].pid);
         }
+        printf("I've sent it\n");
       }
     }
   }
@@ -195,7 +196,7 @@ int do_mq_send(void)
     while(1)
     {
       int i;
-      for(i = 0;i < MAX_MESSAGE_PER_MQ;i++)
+      for(i = 0;i < MAX_MESSAGE_PER_MQ && mqs[mqd].message_count < mqs[mqd].attribute.mm;i++)
       {
         if(pq[i].to_receive_count == 0 && mqs[mqd].message_count < mqs[mqd].attribute.mm) { //this slot is useable
           pq[i].sender = sender;      //set msg sender
@@ -215,7 +216,7 @@ int do_mq_send(void)
   }
   else{ //send non-blocking queue
     int i;
-    for(i = 0;i < MAX_MESSAGE_PER_MQ;i++)
+    for(i = 0;i < MAX_MESSAGE_PER_MQ && mqs[mqd].message_count < mqs[mqd].attribute.mm;i++)
     {
       if(pq[i].to_receive_count == 0 && mqs[mqd].message_count < mqs[mqd].attribute.mm) { //this slot is useable
         pq[i].sender = sender;      //set msg sender
@@ -355,11 +356,13 @@ int do_mq_reqnotify(void)
   //check if mqd is valid
   if(mqs[mqd].registcount < 1)
   {
+    printf("fail to register for notify because of registcount:%d\n",mqs[mqd].registcount );
     return -1;
   }
-  if(sig < 1 || sig > 32 || sig == 9)
+  if(sig < 1 || sig > 32 || sig == SIGKILL)
   {
     //invalid signal number
+    printf("fail to register for notify because of invalid sig%d\n",sig);
     return -1;
   }
   //try find a useable slot
@@ -370,6 +373,8 @@ int do_mq_reqnotify(void)
     {
       mqs[mqd].notify_pids[i].pid = pid;
       mqs[mqd].notify_pids[i].sig = sig;
+      mqs[mqd].notify_pids[i].receiver = who_e;
+      return 0;
     }
   }
   return -1;  //when reaches here, no useable slot for registering

@@ -33,6 +33,7 @@ typedef struct {
 
 //A receiver's pid and that singnal that it want to be used to notify it when msg comes
 typedef struct {
+  endpoint_t receiver;
   int pid;
   int sig;
 } pns_t;
@@ -70,15 +71,15 @@ int mq_close(mqd_t mqd)
   m.m7_i1 = (int)mqd;
   return (_syscall(PM_PROC_NR, 44, &m));
 }
-int mq_send(mqd_t mqd,message_t msg)
+int mq_send(mqd_t mqd,message_t* msg)
 {
   message m;
-  m.m7_i1 = msg.sender;
-  m.m7_p1 = (char*)msg.receivers;
+  m.m7_i1 = (*msg).sender;
+  m.m7_p1 = (char*)((*msg).receivers);
   // m.m7_i2 = msg.receiver_count;
-  m.m7_i2 = msg.to_receive_count;
-  m.m7_p2 = msg.content;
-  m.m7_i4 = msg.priority;
+  m.m7_i2 = (*msg).to_receive_count;
+  m.m7_p2 = (*msg).content;
+  m.m7_i4 = (*msg).priority;
   m.m7_i5 = (int)mqd;
   return (_syscall(PM_PROC_NR, 45, &m));
 }
@@ -95,6 +96,9 @@ int mq_receive(mqd_t mqd,void* buffer)
 }
 int mq_setattr(mqd_t mqd,const mq_attr_t* attr)
 {
+  /*
+  the mm should be no more than MAX_MESSAGE_PER_MQ otherwise its useless
+  */
   message m;
   m.m7_i1 = (*attr).mm;
   m.m7_i2 = (*attr).sb;
@@ -137,5 +141,11 @@ void msg_addreceiver(message_t* msg,int pid)
 {
   (*msg).receivers[(*msg).to_receive_count] = pid;
   (*msg).to_receive_count ++;
+}
+void attr_set(mq_attr_t* attr,int mm,int sb,int rb)
+{
+  (*attr).mm = mm;
+  (*attr).sb = sb;
+  (*attr).rb = rb;
 }
 #endif
