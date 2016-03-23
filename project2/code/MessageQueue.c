@@ -96,17 +96,16 @@ int do_mq_close(void)
   int i = 0;
   for(i = 0;i < mqs[m_in.m7_i1].np_count; i++)     //delete from notify list
   {
-    if(mqs[m_in.m7_i1].notify_pids[i] == pid)
+    if(mqs[m_in.m7_i1].notify_pids[i].pid == pid)
     {
-      mqs[m_in.m7_i1].notify_pids[i] = -1;
+      mqs[m_in.m7_i1].notify_pids[i].pid = 0;
     }
   }
   mqs[m_in.m7_i1].registcount--;
   if(mqs[m_in.m7_i1].registcount == 0)      //free this slot
   {
     mqs_map[m_in.m7_i1] = 0;                //reset map value
-    free(mqs[m_in.m7_i1].notify_pids);
-    mqs[m_in.m7_i1].notify_pids = 0;
+    bzero(mqs[m_in.m7_i1].notify_pids,MAX_QUEUE_RECEIVERS_LENGTH);
     for(i = 0;i < MAX_MESSAGE_PER_MQ;i++)
     {
       if(mqs[m_in.m7_i1].queue_p1[i].to_receive_count != 0)    //free all unread messages
@@ -141,6 +140,24 @@ int do_mq_close(void)
     }
   }
   return 0;
+}
+
+void notify_helper(int mqd,message_t* msg)
+{
+  int mi,qi;
+  for(mi = 0;(*msg).receivers[mi] > 0 && mi < MAX_RECEIVER;mi ++)
+  {
+    for(qi = 0;mqs[mqd].notify_pids[qi].pid > 0 && qi < MAX_QUEUE_RECEIVERS;qi ++)
+    {
+      if((*msg).receivers[mi] == mqs[mqd].notify_pids[qi].pid)
+      {
+        if(sys_kill(mqs[mqd].notify_pids[qi].pid,mqs[mqd].notify_pids[qi].sig) < 0) //fail to send signal
+        {
+          printf("fails to send sig:%d to receiver:%d\n",mqs[mqd].notify_pids[qi].sig,mqs[mqd].notify_pids[qi].pid);
+        }
+      }
+    }
+  }
 }
 
 int do_mq_send(void)
@@ -189,7 +206,8 @@ int do_mq_send(void)
           bzero(pq[i].content,MAX_MSG_LENGTH);
           sys_datacopy(who_e, (vir_bytes)m_in.m7_p2, SELF, (vir_bytes)pq[i].content, MAX_MSG_LENGTH);   //copy message content
           mqs[mqd].message_count ++;
-          debug_send();
+          notify_helper(mqd,&pq[i]);    //notify receivers
+          //debug_send();
           return 0;
         }
       }
@@ -208,6 +226,7 @@ int do_mq_send(void)
         bzero(pq[i].content,MAX_MSG_LENGTH);          //reset content
         sys_datacopy(who_e, (vir_bytes)m_in.m7_p2, SELF, (vir_bytes)pq[i].content, MAX_MSG_LENGTH);   //copy message content
         mqs[mqd].message_count ++;
+        notify_helper(mqd,&pq[i]);    //notify receivers
         return 0;
       }
     }
@@ -247,7 +266,10 @@ int do_mq_receive(void)
                   sys_datacopy(SELF, (vir_bytes)queuearray[qi][mi].content,who_e, (vir_bytes)m_in.m1_p1,MAX_MSG_LENGTH);
                   queuearray[qi][mi].receivers[ri] = -1;
                   queuearray[qi][mi].to_receive_count --;
-                  mqs[mqd].message_count --;
+                  if(queuearray[qi][mi].to_receive_count == 0)
+                  {
+                    mqs[mqd].message_count --;
+                  }
                   return 0;
                 }
               }
@@ -279,7 +301,10 @@ int do_mq_receive(void)
               sys_datacopy(SELF, (vir_bytes)queuearray[qi][mi].content,who_e, (vir_bytes)m_in.m1_p1,MAX_MSG_LENGTH);
               queuearray[qi][mi].receivers[ri] = -1;
               queuearray[qi][mi].to_receive_count --;
-              mqs[mqd].message_count --;
+              if(queuearray[qi][mi].to_receive_count == 0)
+              {
+                mqs[mqd].message_count --;
+              }
               return 0;
             }
           }
@@ -320,4 +345,32 @@ int do_mq_getattr(void)
   sys_datacopy(SELF, (vir_bytes)attr,who_e, (vir_bytes)m_in.m7_p1,sizeof(attr));
   printf("done\n");
   return 0;
+}
+
+int do_mq_reqnotify(void)
+{
+  int mqd = m_in.m1_i1;
+  int sig = m_in.m1_i2;
+  int pid = m_in.m1_i3;
+  //check if mqd is valid
+  if(mqs[mqd].registcount < 1)
+  {
+    return -1;
+  }
+  if(sig < 1 || sig > 32 || sig == 9)
+  {
+    //invalid signal number
+    return -1;
+  }
+  //try find a useable slot
+  int i;
+  for(i = 0;i < MAX_QUEUE_RECEIVERS;i++)
+  {
+    if(mqs[mqd].notify_pids[i].pid == 0) //useable
+    {
+      mqs[mqd].notify_pids[i].pid = pid;
+      mqs[mqd].notify_pids[i].sig = sig;
+    }
+  }
+  return -1;  //when reaches here, no useable slot for registering
 }

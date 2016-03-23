@@ -121,3 +121,4 @@
 #define MQ_RECEIVE 49
 #define MQ_SETATTR 56
 #define MQ_GETATTR 57
+#define MQ_REQNOTIFY 58

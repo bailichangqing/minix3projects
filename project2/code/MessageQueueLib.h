@@ -9,8 +9,10 @@
 #define MAX_QUEUE_NAME_LENGTH 64  //max length of the name of a mq
 #define MAX_MESSAGE_PER_MQ 8
 #define MAX_RECEIVER  8
-#define MAX_MSG_LENGTH 64
-#define RECEIVER_LENGTH (MAX_RECEIVER * 4)
+#define MAX_MSG_LENGTH (64 * sizeof(char))
+#define RECEIVER_LENGTH (MAX_RECEIVER * sizeof(int))
+#define MAX_QUEUE_RECEIVERS (MAX_MESSAGE_PER_MQ * MAX_RECEIVER)
+#define MAX_QUEUE_RECEIVERS_LENGTH (MAX_QUEUE_RECEIVERS * sizeof(pns_t))
 
 //message structure
 typedef struct {
@@ -29,11 +31,16 @@ typedef struct {
  int rb;		              //0:recieve is blocking, 1:recieve is non-blocking
 } mq_attr_t;
 
+//A receiver's pid and that singnal that it want to be used to notify it when msg comes
+typedef struct {
+  int pid;
+  int sig;
+} pns_t;
 //message queue structure
 typedef struct {
  char name[MAX_QUEUE_NAME_LENGTH];			                           //name of this message queue
  mq_attr_t attribute;	                      	 //attribute of this message queue
- int *notify_pids;		                          //pids of proesses that required notifycation
+ pns_t notify_pids[MAX_QUEUE_RECEIVERS];		                          //pids of proesses that required notifycation
  int np_count;                                //length of notify_pids
  int message_count;	                          //the total number of messages
  int registcount;                             //how many processes have opened this queue
@@ -107,6 +114,17 @@ int mq_getattr(mqd_t mqd,mq_attr_t* attr)
   (*attr).sb = buffer[1];
   (*attr).rb = buffer[2];
   return result;
+}
+int mq_reqnotify(mqd_t mqd,int sig)
+{/*
+  To register for notifying, the user must provide a valid mqd and the signal number that it want to receive when msg arrives
+  if the mqd/sig is invalid or the notifying queueu is full, returns -1
+  */
+  message m;
+  m.m1_i1 = (int) mqd;
+  m.m1_i2 = sig;
+  m.m1_i3 = getpid();
+  return (_syscall(PM_PROC_NR,58,&m));
 }
 void msg_init(message_t* msg,int priority,char* content)
 {
