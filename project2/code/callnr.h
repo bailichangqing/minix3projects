@@ -119,3 +119,5 @@
 #define MQ_CLOSE 44
 #define MQ_SEND 45
 #define MQ_RECEIVE 49
+#define MQ_SETATTR 56
+#define MQ_GETATTR 57
