@@ -7,6 +7,17 @@
 
 int main(int argc,char** argv)
 {
+  printf("***************************************************\n");
+  printf("this demo shows how mq_send&mq_receive work    \n");
+  printf("two children processes keep sending msgs to their\n");
+  printf("their father process.");
+  printf("the children processes will finally print how many\n");
+  printf("msgs they have sent successfully\n");
+  printf("the father process will keep trying receiving msgs\n");
+  printf(" and then print the msg\n");
+  printf("the number of msgs the father print should match the\n");
+  printf("number of msgs the children sent\n");
+  printf("***************************************************\n");
   int sendtimes = 16;
   if(argc >= 2)
   {

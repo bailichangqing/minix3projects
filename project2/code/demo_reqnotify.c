@@ -24,6 +24,14 @@ void myhandler(int sig)
 
 int main(int argc,char** argv)
 {
+    printf("********************************************************\n");
+    printf("this demo shows how mq_reqnotify works\n");
+    printf("the father process will create a new message queue\n");
+    printf("and then register for message notifying.after that\n");
+    printf("it will fork two children preocesses to send msgs to \n");
+    printf("itself.If the mq_reqnotify works,the father process should\n");
+    printf("print out all the msgs it receives\n");
+    printf("********************************************************\n");
     mq_attr_t attr;
     attr_set(&attr,8,1,1);
     mqd = mq_open("hakaze",&attr);

@@ -1,6 +1,0 @@
-1:modify "table.c" file,match api name and api number
-2:declare prototype of the system call in "proto.h"
-3:write our system call handler in a seperate file
-4:modify Makefile
-5:modify /usr/src/include/minix/callnr.h and /usr/include/minix/callnr.h(using #define to map the system-call number of the handler function to an identifier)
-6:implement library function in a seperate file and move it to  /usr/src/lib/posix/
