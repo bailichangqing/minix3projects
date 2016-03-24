@@ -155,7 +155,7 @@ void notify_helper(int mqd,message_t* msg)
         {
           printf("fails to send sig:%d to receiver:%d\n",mqs[mqd].notify_pids[qi].sig,mqs[mqd].notify_pids[qi].pid);
         }
-        printf("I've sent it\n");
+        //printf("I've sent it\n");
       }
     }
   }
@@ -175,6 +175,7 @@ int do_mq_send(void)
 
   if(mqs[mqd].registcount <= 0)  //wrong mqd
   {
+    //printf("faild to send,wrong mqd\n");
     return -1;
   }
   message_t* pq = 0;
@@ -232,6 +233,7 @@ int do_mq_send(void)
       }
     }
   }
+  //printf("now useable slot\n");
   return -1;    //fail to do non-blocking send
 }
 int do_mq_receive(void)

@@ -2,12 +2,13 @@
 #define _MESSAGEQUEUELIB_H_
 
 #include <lib.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdlib.h>
+
 
 #define MAX_QUEUE_NAME_LENGTH 64  //max length of the name of a mq
-#define MAX_MESSAGE_PER_MQ 8
+#define MAX_MESSAGE_PER_MQ 16
 #define MAX_RECEIVER  8
 #define MAX_MSG_LENGTH (64 * sizeof(char))
 #define RECEIVER_LENGTH (MAX_RECEIVER * sizeof(int))

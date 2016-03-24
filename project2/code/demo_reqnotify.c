@@ -40,7 +40,11 @@ int main(int argc,char** argv)
     msg_init(&msg2,1,"greeting from child2!");
     msg_addreceiver(&msg1,getpid());
     msg_addreceiver(&msg2,getpid());
-
+    int loopcount = 5;
+    if(argc >= 2)
+    {
+      loopcount = atoi(argv[1]);
+    }
     if(signal(SIGALRM,myhandler) != 0)
     {
       printf("cannot catch sig: %d\n",SIGALRM);
@@ -57,7 +61,7 @@ int main(int argc,char** argv)
       //this is child1
       int i;
       int sendcount = 0;
-      for(i = 0;i < 5;i++)   //send msg 16 times
+      for(i = 0;i < loopcount;i++)   //send msg 16 times
       {
         if(mq_send(mqd,&msg1) == 0)
         {
@@ -74,8 +78,8 @@ int main(int argc,char** argv)
       {
         //this is child2
         int i;
-        int sendcount = 0;
-        for(i = 0;i < 5;i++)   //send msg 16 times
+        int sendcount = 0;;
+        for(i = 0;i < loopcount;i++)   //send msg 16 times
         {
           if(mq_send(mqd,&msg2) == 0)
           {

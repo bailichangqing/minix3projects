@@ -105,7 +105,7 @@ int pm_isokendpt(int ep, int *proc);
 void tell_vfs(struct mproc *rmp, message *m_ptr);
 
 
-/* Message_Queue.c */
+/* MessageQueue.c */
 mqd_t do_mq_open(void);
 int do_mq_close(void);
 int do_mq_send(void);
