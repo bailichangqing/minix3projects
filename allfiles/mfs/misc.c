@@ -80,173 +80,78 @@ int fs_new_driver(void)
 
   return(OK);
 }
-
-int fs_zonemapwalker(){
-	printf("fs_zonemapwalker\n");
-	struct super_block* sp = get_super(fs_m_in.REQ_DEV);
-	// printf("usable inodes on the minor device: %d\n", sp->s_ninodes);
-	// printf("total device size: %d\n", sp->s_nzones);
-	// printf("number of blocks in inode map: %d\n", sp->s_imap_blocks);
-	// printf("number of blocks in zone map: %d\n", sp->s_zmap_blocks);
-	// printf("number of zones: %d\n", sp->s_zones);
-	// printf("block size: %d\n", sp->s_block_size);
-	// printf("number of first data zone: %d\n", sp->s_firstdatazone);
-	// printf("direct zones in an inode: %d\n", sp->s_ndzones);
-	// printf("indirect zones per indirect block: %d\n", sp->s_nindirs);
-	// printf("inodes below this bit number are in use: %d\n", sp->s_isearch);
-	// printf("zones below this bit number are in use: %d\n", sp->s_zsearch);
-  //
-  //   	lost_blocks=calloc(sp->s_zones,4);
-	// int index=0;
-	// int t=0;
-	// int found=0;
-  //
-	// int k;
-	// for(k=0;k<sp->s_zmap_blocks;k++){
-	// 	struct buf* buffer = get_block(fs_m_in.REQ_DEV, sp->s_imap_blocks+2+k, 0);
-	// 	char * tmp=(char*)buffer->data;
-	// 	int i;
-	// 	for(i=1;i<32768;i++){
-	// 		if((tmp[i/8] & (1 << (i%8) )) != 0 ){
-	// 			index=0;
-	// 			found=0;
-	// 			while(block_numbers[index]!=0){
-	// 				if(block_numbers[index]==(32768*k+i+(sp->s_firstdatazone)-1))found=1;
-	// 				index++;
-	// 			}
-	// 			if(found==0){
-	// 				lost_blocks[t]=(32768*k+i+(sp->s_firstdatazone)-1);
-	// 				t++;
-	// 			}
-	// 		}
-	// 	}
-	// 	put_block(buffer,0);
-	// }
-  //
-  //
-  //
-	// printf("test: %d, %d, %d\n",block_numbers[0],block_numbers[1],block_numbers[2]);
-	// printf("index: %d	t: %d\n",index,t);
-	// printf("lost: %ld %d %d %d\n",(long)lost_blocks,lost_blocks[0],lost_blocks[1],lost_blocks[2]);
-  //
-	// fs_m_out.RES_DEV=(long)lost_blocks;
-	// fs_m_out.RES_NBYTES=t*4;
-  int i;
-  for(i = 0;i < sp->s_zmap_blocks;i++)
-  {
-		struct buf* bitmapblock = get_block(fs_m_in.REQ_DEV, 2+ sp->s_imap_blocks + i, NORMAL);
-    bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
-    int k = 0;
-    for(;k < 32768;k++)
-    {
-      // printf("k:%d\t",k);
-      // printf("k / (sizeof(bitchunk_t) * 8):%d\n",k / (sizeof(bitchunk_t) * 8));
-      if((mapchunks[k / (sizeof(bitchunk_t) * 8)] & (bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))) != 0)  //used inode
-      {
-        printf("zone:%d\n",i*32768 + k);
-      }
-    }
-    put_block(bitmapblock,0);
-  }
-
-	return 0;
-}
-
-int fs_inodewalker(){
-  printf("enter mfs inodewalker!\n");
-	struct super_block* sp = get_super(fs_m_in.REQ_DEV);
-	// printf("usable inodes on the minor device: %d\n", sp->s_ninodes);
-	// printf("total device size: %d\n", sp->s_nzones);
-	// printf("number of blocks in inode map: %d\n", sp->s_imap_blocks);
-	// printf("number of blocks in zone map: %d\n", sp->s_zmap_blocks);
-	// printf("number of zones: %d\n", sp->s_zones);
-	// printf("block size: %d\n", sp->s_block_size);
-	// printf("number of first data zone: %d\n", sp->s_firstdatazone);
-	// printf("direct zones in an inode: %d\n", sp->s_ndzones);
-	// printf("indirect zones per indirect block: %d\n", sp->s_nindirs);
-	// printf("inodes below this bit number are in use: %d\n", sp->s_isearch);
-	// printf("zones below this bit number are in use: %d\n", sp->s_zsearch);
-	// block_numbers=calloc(sp->s_zones*4,1);
-	// int index=0;
-	// int k;
-	// for(k=0;k<sp->s_imap_blocks;k++)
-  // {
-	// 	struct buf* buffer = get_block(fs_m_in.REQ_DEV, 2+k, 0);
-	// 	char * tmp=(char*)buffer->data;
-	// 	int i;
-	// 	for(i=1;i<32768;i++){
-	// 		if((tmp[i/8] & (1 << (i%8) )) != 0 ){
-	// 		    struct inode * ino = get_inode(fs_m_in.REQ_DEV,32768*k+i);
-  //               int j;
-  //               for(j=0;j<9;j++){
-  //                   if(ino->i_zone[j]!=0){
-  //                       block_numbers[index] = ino->i_zone[j];
-  //                       index++;
-  //                   }
-  //               }
-  //               if(ino->i_zone[7]!=0){
-  //                   struct buf* b2=get_block(fs_m_in.REQ_DEV, ino->i_zone[7], 0);
-  //                   int * tmp2=(int*)b2->data;
-  //                   j=0;
-  //                   while(tmp2[j]!=0){
-  //                       block_numbers[index] = tmp2[j];
-  //                       index++;
-  //                       j++;
-  //                   }
-  //               put_block(b2,0);
-  //               }
-	// 		    put_inode(ino);
-	// 		}
-	// 	}
-	// 	put_block(buffer,0);
-	// }
-	// printf("test: %d, %d, %d\n",block_numbers[0],block_numbers[1],block_numbers[2]);
-	// printf("index: %d\n",index);
-	// fs_m_out.RES_DEV=(int)block_numbers;
-	// fs_m_out.RES_NBYTES=index*4;
-  //****************************************************************************************************
-
-  //read inodebitmap blocks
-  int i;
-  for(i = 0;i < sp->s_imap_blocks;i++)
-  {
-		struct buf* bitmapblock = get_block(fs_m_in.REQ_DEV, 2+i, NORMAL);
-    bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
-    int k = 0;
-    if(i == 0)
-    {
-      k = 1;
-    }
-    for(;k < 32768;k++)
-    {
-      // printf("k:%d\t",k);
-      // printf("k / (sizeof(bitchunk_t) * 8):%d\n",k / (sizeof(bitchunk_t) * 8));
-      if((mapchunks[k / (sizeof(bitchunk_t) * 8)] & (bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))) != 0)  //used inode
-      {
-        printf("inode:%d\n",i*32768 + k);
-
-      }
-    }
-    put_block(bitmapblock,0);
-  }
-	return 0;
-}
-int fs_directorywalker()
+fs_walker()
 {
-  struct inode* tmpinode= get_inode(fs_m_in.m9_l1,fs_m_in.m9_l2);
-  printf("Zones of inode %ld are:",fs_m_in.m9_l2);
-  int i;
-  for(i = 0;i < V2_NR_TZONES && tmpinode->i_zone[i] != 0;i++)
+  if(fs_m_in.m9_l3 == 0)  //inodemapwalker
   {
-    printf("%d  ",tmpinode->i_zone[i]);
+    printf("enter mfs inodewalker!\n");
+    struct super_block* sp = get_super(fs_m_in.m9_l1);
+    //read inodebitmap blocks
+    int i;
+    for(i = 0;i < sp->s_imap_blocks;i++)
+    {
+      struct buf* bitmapblock = get_block(fs_m_in.m9_l1, 2+i, NORMAL);
+      bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
+      int k = 0;
+      if(i == 0)
+      {
+        k = 1;
+      }
+      for(;k < 32768;k++)
+      {
+        if((mapchunks[k / (sizeof(bitchunk_t) * 8)] & (bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))) != 0)  //used inode
+        {
+          printf("inode:%d\n",i*32768 + k);
+
+        }
+      }
+      put_block(bitmapblock,0);
+    }
+    return 0;
   }
-  printf("\n");
-  put_inode(tmpinode);
-  return 0;
+  else if(fs_m_in.m9_l3 == 1)  //zonemapwalker
+  {
+    printf("fs_zonemapwalker\n");
+    struct super_block* sp = get_super(fs_m_in.m9_l1);
+    int i;
+    for(i = 0;i < sp->s_zmap_blocks;i++)
+    {
+      struct buf* bitmapblock = get_block(fs_m_in.m9_l1, 2+ sp->s_imap_blocks + i, NORMAL);
+      bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
+      int k = 0;
+      for(;k < 32768;k++)
+      {
+        if((mapchunks[k / (sizeof(bitchunk_t) * 8)] & (bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))) != 0)  //used zone
+        {
+          printf("zone:%d\n",i*32768 + k + 1);
+        }
+      }
+      put_block(bitmapblock,0);
+    }
+    return 0;
+  }
+  else  //dirwalker
+  {
+    struct inode* tmpinode= get_inode(fs_m_in.m9_l1,fs_m_in.m9_l2);
+    printf("Zones of inode %ld are:",fs_m_in.m9_l2);
+    int i;
+    for(i = 0;i < V2_NR_TZONES;i++)
+    {
+      if(tmpinode->i_zone[i] != 0)
+        printf("%u  ",tmpinode->i_zone[i]);
+    }
+    printf("\n");
+    put_inode(tmpinode);
+    return 0;
+  }
 }
 int fs_bitmapdamager()
 {
-  //m9_s1:dev m9_s2:inodenumber inode/zone flag:m9_s3
+  /*
+  m9_s1:dev
+  m9_s2:inodenumber
+  m9_s3:inode/zone flag
+  */
   struct super_block* sp = get_super(fs_m_in.m9_s1);
   int inodezoneflag = fs_m_in.m9_s3 == 0? 0:sp->s_zmap_blocks;
   int inodenumber = fs_m_in.m9_s2;
@@ -260,120 +165,131 @@ int fs_bitmapdamager()
   put_block(bitmapblock,0);
   return 0;
 }
-int fs_ibitmapfixer()
+int fs_bitmapfixer()
 {
-  printf("I'm here!\n");
-  // struct super_block* sp = get_super(fs_m_in.REQ_DEV);
-  // struct buf* inodebuffer = NULL;
-  // d2_inode* inodetable;
-  // int inodeindex = -1;
-  // // int inodeperblock = sizeof(sp->s_block_size) / sizeof(d2_inode);
-  // int inodeperblock = sp->s_block_size / sizeof(d2_inode);
-  // //read inodebitmap blocks
-  // int i;
-  // for(i = 0;i < sp->s_imap_blocks;i++)
-  // {
-  //   struct buf* bitmapblock = get_block(fs_m_in.REQ_DEV, 2+i, NORMAL);
-  //   bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
-  //   int k = 0;
-  //   if(i == 0)
-  //   {
-  //     k = 1;
-  //   }
-  //   for(;k < 32768;k++)
-  //   {
-  //     inodeindex ++;
-  //     if(inodeindex % inodeperblock == 0)//load new inodeblock
-  //     {
-  //       inodeindex = 0;
-  //       if(inodebuffer != NULL)
-  //       {
-  //         put_block(inodebuffer,0);
-  //       }
-  //       inodebuffer = get_block(fs_m_in.REQ_DEV,2 + sp->s_imap_blocks + sp->s_zmap_blocks + (i*32768 + k) / inodeperblock,NORMAL);
-  //       inodetable = (d2_inode*)inodebuffer->data;
-  //     }
-  //     if((mapchunks[k / (sizeof(bitchunk_t) * 8)] & (bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))) != 0)  //used inodebit
-  //     {
-  //       //check if inode is unused
-  //       if(inodetable[inodeindex].d2_nlinks == 0)// no not used
-  //       {
-  //         printf("inode:%d fixed\n",i*32768 + k);
-  //         mapchunks[k / (sizeof(bitchunk_t) * 8)] &= (~((bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))));//turn it to 0
-  //       }
-  //     }
-  //     else
-  //     {
-  //       //check if inode is used
-  //       if(inodetable[inodeindex].d2_nlinks != 0)// no not used
-  //       {
-  //         printf("inode:%d fixed\n",i*32768 + k);
-  //         mapchunks[k / (sizeof(bitchunk_t) * 8)] |= ((bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8)));//turn it to 0
-  //       }
-  //     }
-  //   }
-  //   put_block(inodebuffer,0);
-  //   put_block(bitmapblock,0);
-  // }
-  return 0;
-}
-int fs_inodedamage(){
-	// fprintf(stderr, "fs_inodedamage\n");
-  //
-	// //struct super_block * sp=get_super(fs_m_in.REQ_DEV);
-  //
-	// block_numbers=calloc(9,4);
-	// int index=0;
-  //
-  //   broken_inodeNumber = fs_m_in.REQ_INODE_NR;
-  //
-  //   struct inode * ino = get_inode(fs_m_in.REQ_DEV,broken_inodeNumber);
-  //
-  //   int j;
-  //   for(j=0;j<9;j++){
-  //       if(ino->i_zone[j]!=0){
-  //           block_numbers[index] = ino->i_zone[j];
-  //           ino->i_zone[j] = 0;
-  //           index++;
-  //       }
-  //   }
-  //   put_inode(ino);
-  //
-	// printf("test: %d, %d, %d\n",block_numbers[0],block_numbers[1],block_numbers[2]);
-	// printf("index: %d\n",index);
-  //
-	// fs_m_out.RES_DEV=(int)block_numbers;
-	// fs_m_out.RES_NBYTES=index*4;
-  //
-
-	return 0;
-}
-
-int fs_inodefixer(){
-	// fprintf(stderr, "fs_inodeFixer\n");
-  //
-	// int index=0;
-  //
-	// printf("test:  %d  %d  \n",block_numbers[0],lost_blocks[0]);
-	// broken_inodeNumber = fs_m_in.REQ_INODE_NR;
-	// if(broken_inodeNumber==0)return 0;
-  //
-  //   struct inode * ino = get_inode(fs_m_in.REQ_DEV,broken_inodeNumber);
-  //
-  //   int j;
-  //   for(j=0;j<7;j++){
-  //       if(ino->i_zone[j]==0){
-  //           ino->i_zone[j]= lost_blocks[index] ;
-  //           index++;
-  //       }
-  //   }
-  //   if(lost_blocks[8]!=0) ino->i_zone[7]=lost_blocks[8];
-  //   if(lost_blocks[1033]!=0) ino->i_zone[8]=lost_blocks[1033];
-  //   put_inode(ino);
-  //
-	// printf("done\n");
-	// free(lost_blocks);
-	// free(block_numbers);
-
-	return 0;
+  /*
+  m9_l1 dev
+  m9_l3 fixertype
+  */
+  if(fs_m_in.m9_l3 == 0)  //fix inode bitmapblock
+  {
+    printf("enter mfs inode bitmap fixer!\n");
+    struct super_block* sp = get_super(fs_m_in.m9_l1);
+    //read inodebitmap blocks
+    int i;
+    for(i = 0;i < sp->s_imap_blocks;i++)
+    {
+      struct buf* bitmapblock = get_block(sp->s_dev, 2+i, NORMAL);
+      bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
+      int k = 0;
+      if(i == 0)
+      {
+        k = 1;
+      }
+      for(;k < 32768;k++)
+      {
+        if(i*32768 + k > sp->s_ninodes)
+        {
+          break;
+        }
+        if((mapchunks[k / (sizeof(bitchunk_t) * 8)] & (bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))) != 0)  //used inode
+        {
+          struct inode inodetmp;
+          inodetmp.i_dev = sp->s_dev;
+          inodetmp.i_num = i*32768 + k;
+          rw_inode(&inodetmp,READING);
+          if(inodetmp.i_nlinks == 0)
+          {
+            mapchunks[k / (sizeof(bitchunk_t) * 8)] &= ~((bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8)));
+            printf("Inode %d fixed!\n",i*32768 + k);
+          }
+        }
+        else
+        {
+          struct inode inodetmp;
+          inodetmp.i_dev = sp->s_dev;
+          inodetmp.i_num = i*32768 + k;
+          rw_inode(&inodetmp,READING);
+          if(inodetmp.i_nlinks != 0)
+          {
+            mapchunks[k / (sizeof(bitchunk_t) * 8)] |= ((bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8)));
+            printf("Inode %d fixed!\n",i*32768 + k);
+          }
+        }
+      }
+      put_block(bitmapblock,0);
+    }
+    printf("inode bitmap fixer return\n");
+    return 0;
+  }
+  else if(fs_m_in.m9_l3 == 1) //fix zone bitmap
+  {
+    printf("enter mfs zone bitmap fixer!\n");
+    struct super_block* sp = get_super(fs_m_in.m9_l1);
+    //first erase all zone bit map
+    int logicalzonebitmapblockindex;
+    for(logicalzonebitmapblockindex = 0;logicalzonebitmapblockindex < sp->s_zmap_blocks;logicalzonebitmapblockindex++)
+    {
+      struct buf* tmpbitmapblock = get_block(sp->s_dev,logicalzonebitmapblockindex + 2 + sp->s_imap_blocks,NORMAL);
+      bitchunk_t* tmpchunktable = (bitchunk_t*)tmpbitmapblock->data;
+      int chunkindex;
+      for(chunkindex = 0;chunkindex < (sp->s_block_size / sizeof(bitchunk_t));chunkindex++)
+      {
+        tmpchunktable[chunkindex] &= (bitchunk_t) 0;
+      }
+      put_block(tmpbitmapblock,0);
+    }
+    //check all inode and fix zonebitmap
+    int i;
+    for(i = 0;i < sp->s_imap_blocks;i++)
+    {
+      struct buf* bitmapblock = get_block(sp->s_dev, 2+i, NORMAL);
+      bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
+      int k = 0;
+      if(i == 0)
+      {
+        k = 1;
+      }
+      for(;k < 32768;k++)
+      {
+        if(i*32768 + k > sp->s_ninodes)
+        {
+          break;
+        }
+        if((mapchunks[k / (sizeof(bitchunk_t) * 8)] & (bitchunk_t)1 << (k % (sizeof(bitchunk_t) * 8))) != 0)  //used inode
+        {
+          struct inode inodetmp;
+          inodetmp.i_dev = sp->s_dev;
+          inodetmp.i_num = i*32768 + k;
+          rw_inode(&inodetmp,READING);
+          int inodezoneindex;
+          printf("fix inode%d zones\n",i*32768 + k);
+          for(inodezoneindex = 0;inodezoneindex < V2_NR_TZONES;inodezoneindex++);
+          {
+            if(inodetmp.i_zone[inodezoneindex] != 0)
+            {
+              unsigned int bitsperblock = sp->s_block_size * 8;
+              unsigned int bitsperchunk = sizeof(bitchunk_t) * 8;
+              unsigned int logicalzoneindex = inodetmp.i_zone[inodezoneindex];
+              unsigned int physicalblockindex = (logicalzoneindex / bitsperblock) + 2 + sp->s_imap_blocks;
+              unsigned int chunkindex = (logicalzoneindex % bitsperblock) / bitsperchunk;
+              unsigned int bitindex = logicalzoneindex % bitsperchunk;
+              struct buf* tmpzonebitmapblock = get_block(sp->s_dev,physicalblockindex,NORMAL);
+              bitchunk_t* tmpchunktable = (bitchunk_t*)tmpzonebitmapblock->data;
+              tmpchunktable[chunkindex] |= (bitchunk_t)1 << bitindex;
+              printf("zone %d fixed\n",logicalzoneindex);
+              put_block(tmpzonebitmapblock,0);
+            }
+          }
+        }
+      }
+      put_block(bitmapblock,0);
+    }
+    printf("zone bitmap fixer return\n");
+    return 0;
+  }
+  else
+  {
+    return 0;
+  }
 }

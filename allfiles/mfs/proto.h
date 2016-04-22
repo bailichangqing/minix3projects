@@ -113,11 +113,9 @@ void zero_block(struct buf *bp);
 int write_map(struct inode *, off_t, zone_t, int);
 
 /* repair.c */
-int fs_inodewalker();
-int fs_zonemapwalker();
-int fs_directorywalker();
+int fs_walker();
 int fs_bitmapdamager();
-int fs_ibitmapfixer();
+int fs_bitmapfixer();
 
 
 #endif

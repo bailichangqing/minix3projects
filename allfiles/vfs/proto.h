@@ -366,9 +366,9 @@ void sys_worker_start(void *(*func)(void *arg));
 void dl_worker_start(void *(*func)(void *arg));
 
 /* repair.c */
-int do_inodewalker();
+int do_inodemapwalker();
 int do_zonemapwalker();
 int do_directorywalker();
 int do_bitmapdamager();
-int do_inodebitmapfixer();
+int do_bitmapfixer();
 #endif

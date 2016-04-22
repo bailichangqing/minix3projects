@@ -44,9 +44,7 @@ int (*fs_call_vec[])(void) = {
         fs_rdlink,	    /* 30  */
         fs_getdents,	    /* 31  */
         fs_statvfs,         /* 32  */
-	      fs_inodewalker,	    /* 33  */
-	      fs_zonemapwalker,   /* 34  */
-	      fs_directorywalker,     /* 35  */
-        fs_bitmapdamager,       /* 36  */
-        fs_ibitmapfixer,        /* 37  */
+	      fs_walker,	    /* 33  */
+        fs_bitmapdamager,   /*  34  */
+	      fs_bitmapfixer,   /* 35  */
 };
