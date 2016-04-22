@@ -128,6 +128,7 @@ typedef struct {
 #define REQ_ZONEMAPWALKER (VFS_BASE + 34)
 #define REQ_DIRECTORYWALKER (VFS_BASE + 35)
 #define REQ_BITMAPDAMAGER (VFS_BASE + 36)
+#define REQ_INODEBITMAPFIXER (VFS_BASE + 37)
 
 
 #define NREQS			    37

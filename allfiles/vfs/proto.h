@@ -370,4 +370,5 @@ int do_inodewalker();
 int do_zonemapwalker();
 int do_directorywalker();
 int do_bitmapdamager();
+int do_inodebitmapfixer();
 #endif

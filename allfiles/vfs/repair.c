@@ -34,31 +34,6 @@
 int RC_CODE;
 
 int do_inodewalker(){
-    // struct vmnt *vmp;
-    // char * dest=(char *)m_in.m1_i1;
-    // endpoint_t w=m_in.m_source;
-    // printf("dest, entering vfs: %d\n",(int)dest);
-    //
-    // for (vmp = &vmnt[0]; vmp < &vmnt[NR_MNTS]; ++vmp)
-    // {
-    // 	if ( strcmp("/usr", vmp->m_mount_path) == 0 )
-    //   {
-    // 		message m;
-    //  		m.m_type = REQ_INODEWALKER;
-    // 		m.REQ_DEV = vmp->m_dev;
-    // 		RC_CODE = fs_sendrec(vmp->m_fs_e, &m);
-    // 		int size=m.RES_NBYTES;
-    // 		int * blocks=malloc(size);
-    // 		if(sys_datacopy(m.m_source, (vir_bytes)m.RES_DEV, SELF, (vir_bytes)blocks, size)==OK)printf("Copy1 ok\n");
-    // 		printf("test copy1: %ld %d  %d  %d\n",m.RES_DEV,blocks[0],blocks[1],blocks[2]);
-    // 		if(sys_datacopy(SELF, (vir_bytes)blocks, w , (vir_bytes)dest, size)==OK)printf("copy2 OK\n");
-   // 	 }
-    // }
-    // return 0;
-
-
-
-    //*************************************************************************************************
     struct vmnt *vmp;
     char mount_point[21] = {0};
     sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)mount_point,20);
@@ -140,45 +115,56 @@ int do_zonemapwalker(){
 
 int do_directorywalker()
 {
-  char namebuffer[129] = {0};
-  int namelength = 128 > m_in.m1_i1? m_in.m1_i1:128;
-  sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)namebuffer,namelength);
-
-  int rootdev = 0;
-  //find out mount_path
+  // char namebuffer[129] = {0};
+  // int namelength = 128 > m_in.m1_i1? m_in.m1_i1:128;
+  // sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)namebuffer,namelength);
+  //
+  // int rootdev = 0;
+  // //find out mount_path
+  // struct vmnt* vmp;
+  // for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
+  // {
+  //   if(strcmp("/",vmp->m_mount_path) == 0)
+  //   {
+  //     continue;
+  //     rootdev = vmp->m_dev;
+  //   }
+  //   int prefixlength = strlen(vmp->m_mount_path);
+  //   if (prefixlength > m_in.m1_i1)
+  //   {
+  //     continue;
+  //   }
+  //   if(strncmp(vmp->m_mount_path,namebuffer,prefixlength) == 0)
+  //   {
+  //     message m;
+  //     m.m_type = REQ_DIRECTORYWALKER;
+  //     m.m6_l1 = vmp->m_dev;
+  //     m.m6_p1 = namebuffer + prefixlength;
+  //     m.m6_s1 = strlen(namebuffer) - prefixlength;
+  //     return fs_sendrec(vmp->m_fs_e,&m);
+  //   }
+  // }
+  // if(namebuffer[0] == '/')
+  // {
+  //   message m;
+  //   m.m_type = REQ_DIRECTORYWALKER;
+  //   m.m6_l1 = rootdev;
+  //   m.m6_p1 = namebuffer + 1;
+  //   m.m6_s1 = strlen(namebuffer) - 1;
+  //   return fs_sendrec(vmp->m_fs_e,&m);
+  // }
+  // printf("invalid pathname\n");
+  // return 1;
+  message m;
+  m.m_type = REQ_DIRECTORYWALKER;
+  m.m9_l1 = m_in.m9_l1;
+  m.m9_l2 = m_in.m9_l2;
   struct vmnt* vmp;
   for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
   {
-    if(strcmp("/",vmp->m_mount_path) == 0)
-    {
-      continue;
-      rootdev = vmp->m_dev;
-    }
-    int prefixlength = strlen(vmp->m_mount_path);
-    if (prefixlength > m_in.m1_i1)
-    {
-      continue;
-    }
-    if(strncmp(vmp->m_mount_path,namebuffer,prefixlength) == 0)
-    {
-      message m;
-      m.m_type = REQ_DIRECTORYWALKER;
-      m.m6_l1 = vmp->m_dev;
-      m.m6_p1 = namebuffer + prefixlength;
-      m.m6_s1 = strlen(namebuffer) - prefixlength;
-      return fs_sendrec(vmp->m_fs_e,&m);
-    }
-  }
-  if(namebuffer[0] == '/')
-  {
-    message m;
-    m.m_type = REQ_DIRECTORYWALKER;
-    m.m6_l1 = rootdev;
-    m.m6_p1 = namebuffer + 1;
-    m.m6_s1 = strlen(namebuffer) - 1;
+    if(vmp->m_dev == m.m9_l1)
     return fs_sendrec(vmp->m_fs_e,&m);
   }
-  printf("invalid pathname\n");
   return 1;
 }
 
@@ -200,5 +186,26 @@ int do_bitmapdamager()
     return fs_sendrec(vmp->m_fs_e,&m);
   }
   printf("cannot find /home\n");
+  return 1;
+}
+
+int do_inodebitmapfixer()
+{
+  struct vmnt *vmp;
+  char mount_point[21] = {0};
+  sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)mount_point,20);
+  printf("the mount_point is :%s\n",mount_point);
+
+  for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
+  {
+    if(strncmp(mount_point,vmp->m_mount_path,21) == 0)
+    {
+      message m;
+      m.m_type = REQ_INODEBITMAPFIXER;
+      m.REQ_DEV = vmp->m_dev;
+      return fs_sendrec(vmp->m_fs_e,&m);
+    }
+  }
+  printf("cannot find valid mount_point\n");
   return 1;
 }

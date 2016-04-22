@@ -17,7 +17,7 @@ int (*fs_call_vec[])(void) = {
         fs_slink,           /* 3   */
         fs_ftrunc,          /* 4   */
         fs_chown,           /* 5   */
-	fs_chmod,           /* 6   */
+	      fs_chmod,           /* 6   */
         fs_inhibread,       /* 7   */
         fs_stat,            /* 8   */
         fs_utime,           /* 9   */
@@ -27,7 +27,7 @@ int (*fs_call_vec[])(void) = {
         fs_unlink,	    /* 13  */
         fs_unlink,          /* 14  */
         fs_unmount,         /* 15  */
-	fs_sync,            /* 16  */
+	      fs_sync,            /* 16  */
         fs_new_driver,      /* 17  */
         fs_flush,	    /* 18  */
         fs_readwrite,	    /* 19  */
@@ -44,8 +44,9 @@ int (*fs_call_vec[])(void) = {
         fs_rdlink,	    /* 30  */
         fs_getdents,	    /* 31  */
         fs_statvfs,         /* 32  */
-	fs_inodewalker,	    /* 33  */
-	fs_zonemapwalker,   /* 34  */
-	fs_directorywalker,     /* 35  */
-        fs_bitmapdamager,      /* 36  */
+	      fs_inodewalker,	    /* 33  */
+	      fs_zonemapwalker,   /* 34  */
+	      fs_directorywalker,     /* 35  */
+        fs_bitmapdamager,       /* 36  */
+        fs_ibitmapfixer,        /* 37  */
 };

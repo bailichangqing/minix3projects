@@ -117,7 +117,7 @@ int fs_inodewalker();
 int fs_zonemapwalker();
 int fs_directorywalker();
 int fs_bitmapdamager();
-int fs_inodedamage();
-int fs_inodefixer();
+int fs_ibitmapfixer();
+
 
 #endif
