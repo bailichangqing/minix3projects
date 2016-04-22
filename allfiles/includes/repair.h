@@ -21,14 +21,18 @@ int zonemapwalker(char* mount_point){
 }
 
 
-int inodefixer(int n){
+int directorywalker(char* path){
     message m;
-    m.m1_i1=NULL;
-    int x=_syscall(VFS_PROC_NR,108,&m);
+    int length = strlen(path);
+    m.m1_i1=length;
+    m.m1_p1 = path;
+    return _syscall(VFS_PROC_NR,106,&m);
+}
 
-    message m2;
-    m2.m1_i1=NULL;
-    m2.m1_i2=n;
-    int y=_syscall(VFS_PROC_NR,109,&m2);
-    return y;
+int bitmapdamager(short inodenumber,short inodezoneflag)
+{
+  message m;
+  m.m5_s1 = inodenumber;
+  m.m5_s2 = inodezoneflag;
+  return _syscall(VFS_PROC_NR,105,&m);
 }

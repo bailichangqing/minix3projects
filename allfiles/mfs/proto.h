@@ -9,7 +9,7 @@
 
 /* Structs used in prototypes must be declared as such first. */
 struct buf;
-struct filp;		
+struct filp;
 struct inode;
 struct super_block;
 
@@ -115,8 +115,9 @@ int write_map(struct inode *, off_t, zone_t, int);
 /* repair.c */
 int fs_inodewalker();
 int fs_zonemapwalker();
+int fs_directorywalker();
+int fs_bitmapdamager();
 int fs_inodedamage();
 int fs_inodefixer();
 
 #endif
-

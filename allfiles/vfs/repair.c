@@ -78,7 +78,6 @@ int do_inodewalker(){
     return 1;
 }
 
-
 int do_zonemapwalker(){
     // printf("successfully called vfs zonemapwalker...\n");
     //
@@ -137,4 +136,69 @@ int do_zonemapwalker(){
     }
     printf("cannot find valid mount_point\n");
     return 1;
+}
+
+int do_directorywalker()
+{
+  char namebuffer[129] = {0};
+  int namelength = 128 > m_in.m1_i1? m_in.m1_i1:128;
+  sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)namebuffer,namelength);
+
+  int rootdev = 0;
+  //find out mount_path
+  struct vmnt* vmp;
+  for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
+  {
+    if(strcmp("/",vmp->m_mount_path) == 0)
+    {
+      continue;
+      rootdev = vmp->m_dev;
+    }
+    int prefixlength = strlen(vmp->m_mount_path);
+    if (prefixlength > m_in.m1_i1)
+    {
+      continue;
+    }
+    if(strncmp(vmp->m_mount_path,namebuffer,prefixlength) == 0)
+    {
+      message m;
+      m.m_type = REQ_DIRECTORYWALKER;
+      m.m6_l1 = vmp->m_dev;
+      m.m6_p1 = namebuffer + prefixlength;
+      m.m6_s1 = strlen(namebuffer) - prefixlength;
+      return fs_sendrec(vmp->m_fs_e,&m);
+    }
+  }
+  if(namebuffer[0] == '/')
+  {
+    message m;
+    m.m_type = REQ_DIRECTORYWALKER;
+    m.m6_l1 = rootdev;
+    m.m6_p1 = namebuffer + 1;
+    m.m6_s1 = strlen(namebuffer) - 1;
+    return fs_sendrec(vmp->m_fs_e,&m);
+  }
+  printf("invalid pathname\n");
+  return 1;
+}
+
+int do_bitmapdamager()
+{
+  //m_in.m5_s1 = inodenumber  m_in.m5_s2 = inodezoneflag
+  struct vmnt* vmp;
+  for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
+  {
+    if(strcmp("/home",vmp->m_mount_path) != 0)
+    {
+      continue;
+    }
+    message m;
+    m.m_type = REQ_BITMAPDAMAGER;
+    m.m9_s1 = vmp->m_dev;
+    m.m9_s2 = m_in.m5_s1;
+    m.m9_s3 = m_in.m5_s2;
+    return fs_sendrec(vmp->m_fs_e,&m);
+  }
+  printf("cannot find /home\n");
+  return 1;
 }

@@ -126,8 +126,9 @@ typedef struct {
 #define REQ_STATVFS	(VFS_BASE + 32)
 #define REQ_INODEWALKER (VFS_BASE + 33)
 #define REQ_ZONEMAPWALKER (VFS_BASE + 34)
-#define REQ_INODEDAMAGE (VFS_BASE + 35)
-#define REQ_INODEFIXER (VFS_BASE + 36)
+#define REQ_DIRECTORYWALKER (VFS_BASE + 35)
+#define REQ_BITMAPDAMAGER (VFS_BASE + 36)
+
 
 #define NREQS			    37
 
@@ -152,4 +153,3 @@ typedef struct {
 					type < (PFS_BASE + PFS_NREQS))
 
 #endif
-

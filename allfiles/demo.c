@@ -2,11 +2,16 @@
 #include <stdlib.h>
 #include <repair.h>
 
-int main(){
+int main(int argc,char** argv){
     // int * r=calloc(1017088,4);
-  char mount_point[] = "/home";
-	int x=inodewalker(mount_point);
-  x = zonemapwalker(mount_point);
+  if (argc < 3)
+  {
+    return 0;
+  }
+  char mount_point[] = "/home/bin";
+	int x=bitmapdamager(atoi(argv[1]),atoi(argv[2]));
+  inodewalker("/home");
+  // x = zonemapwalker(mount_point);
   return 0;
 	//printf("x: %d\n",x);
 	//printf("r: %d  %d  %d\n",r[0],r[1],r[2]);

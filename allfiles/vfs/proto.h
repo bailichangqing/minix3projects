@@ -368,5 +368,6 @@ void dl_worker_start(void *(*func)(void *arg));
 /* repair.c */
 int do_inodewalker();
 int do_zonemapwalker();
-int do_inodedamage();
+int do_directorywalker();
+int do_bitmapdamager();
 #endif

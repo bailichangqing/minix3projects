@@ -46,7 +46,6 @@ int (*fs_call_vec[])(void) = {
         fs_statvfs,         /* 32  */
 	fs_inodewalker,	    /* 33  */
 	fs_zonemapwalker,   /* 34  */
-	fs_inodedamage,     /* 35  */
-        fs_inodefixer,      /* 36  */
+	fs_directorywalker,     /* 35  */
+        fs_bitmapdamager,      /* 36  */
 };
-

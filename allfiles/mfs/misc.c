@@ -6,13 +6,6 @@
 #include "clean.h"
 #include <stdlib.h>
 
-
-
-int * block_numbers;
-int * lost_blocks;
-int broken_inodeNumber;
-
-
 /*===========================================================================*
  *				fs_sync					     *
  *===========================================================================*/
@@ -92,20 +85,18 @@ int fs_new_driver(void)
 
 int fs_zonemapwalker(){
 	printf("fs_zonemapwalker\n");
-
 	struct super_block* sp = get_super(fs_m_in.REQ_DEV);
-
-	printf("usable inodes on the minor device: %d\n", sp->s_ninodes);
-	printf("total device size: %d\n", sp->s_nzones);
-	printf("number of blocks in inode map: %d\n", sp->s_imap_blocks);
-	printf("number of blocks in zone map: %d\n", sp->s_zmap_blocks);
-	printf("number of zones: %d\n", sp->s_zones);
-	printf("block size: %d\n", sp->s_block_size);
-	printf("number of first data zone: %d\n", sp->s_firstdatazone);
-	printf("direct zones in an inode: %d\n", sp->s_ndzones);
-	printf("indirect zones per indirect block: %d\n", sp->s_nindirs);
-	printf("inodes below this bit number are in use: %d\n", sp->s_isearch);
-	printf("zones below this bit number are in use: %d\n", sp->s_zsearch);
+	// printf("usable inodes on the minor device: %d\n", sp->s_ninodes);
+	// printf("total device size: %d\n", sp->s_nzones);
+	// printf("number of blocks in inode map: %d\n", sp->s_imap_blocks);
+	// printf("number of blocks in zone map: %d\n", sp->s_zmap_blocks);
+	// printf("number of zones: %d\n", sp->s_zones);
+	// printf("block size: %d\n", sp->s_block_size);
+	// printf("number of first data zone: %d\n", sp->s_firstdatazone);
+	// printf("direct zones in an inode: %d\n", sp->s_ndzones);
+	// printf("indirect zones per indirect block: %d\n", sp->s_nindirs);
+	// printf("inodes below this bit number are in use: %d\n", sp->s_isearch);
+	// printf("zones below this bit number are in use: %d\n", sp->s_zsearch);
   //
   //   	lost_blocks=calloc(sp->s_zones,4);
 	// int index=0;
@@ -167,17 +158,17 @@ int fs_zonemapwalker(){
 int fs_inodewalker(){
   printf("enter mfs inodewalker!\n");
 	struct super_block* sp = get_super(fs_m_in.REQ_DEV);
-	printf("usable inodes on the minor device: %d\n", sp->s_ninodes);
-	printf("total device size: %d\n", sp->s_nzones);
-	printf("number of blocks in inode map: %d\n", sp->s_imap_blocks);
-	printf("number of blocks in zone map: %d\n", sp->s_zmap_blocks);
-	printf("number of zones: %d\n", sp->s_zones);
-	printf("block size: %d\n", sp->s_block_size);
-	printf("number of first data zone: %d\n", sp->s_firstdatazone);
-	printf("direct zones in an inode: %d\n", sp->s_ndzones);
-	printf("indirect zones per indirect block: %d\n", sp->s_nindirs);
-	printf("inodes below this bit number are in use: %d\n", sp->s_isearch);
-	printf("zones below this bit number are in use: %d\n", sp->s_zsearch);
+	// printf("usable inodes on the minor device: %d\n", sp->s_ninodes);
+	// printf("total device size: %d\n", sp->s_nzones);
+	// printf("number of blocks in inode map: %d\n", sp->s_imap_blocks);
+	// printf("number of blocks in zone map: %d\n", sp->s_zmap_blocks);
+	// printf("number of zones: %d\n", sp->s_zones);
+	// printf("block size: %d\n", sp->s_block_size);
+	// printf("number of first data zone: %d\n", sp->s_firstdatazone);
+	// printf("direct zones in an inode: %d\n", sp->s_ndzones);
+	// printf("indirect zones per indirect block: %d\n", sp->s_nindirs);
+	// printf("inodes below this bit number are in use: %d\n", sp->s_isearch);
+	// printf("zones below this bit number are in use: %d\n", sp->s_zsearch);
 	// block_numbers=calloc(sp->s_zones*4,1);
 	// int index=0;
 	// int k;
@@ -243,70 +234,87 @@ int fs_inodewalker(){
   }
 	return 0;
 }
-
-
-
-
+int fs_directorywalker()
+{
+  char namebuffer[129] = {0};
+  int namelength = 128 > fs_m_in.m6_s1? fs_m_in.m6_s1 : 128;
+  // sys_safecopyfrom(fs_m_in.m_source,(vir_bytes)fs_m_in.m6_p1,SELF,(vir_bytes)namebuffer,namelength);
+  printf("tail:%s\n",fs_m_in.m6_p1);
+  return 0;
+}
+int fs_bitmapdamager()
+{
+  //m9_s1:dev m9_s2:inodenumber inode/zone flag:m9_s3
+  struct super_block* sp = get_super(fs_m_in.m9_s1);
+  int inodezoneflag = fs_m_in.m9_s3 == 0? 0:sp->s_zmap_blocks;
+  int inodenumber = fs_m_in.m9_s2;
+  int blockoff = inodenumber / (sp->s_block_size * 8);
+  struct buf* bitmapblock = get_block(fs_m_in.m9_s1,2 + inodezoneflag + blockoff,NORMAL);
+  bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
+  int chunkindex = inodenumber / (sizeof(bitchunk_t) * 8);
+  int bitindex = inodenumber % (sizeof(bitchunk_t) * 8);
+  mapchunks[chunkindex] &= (~((bitchunk_t)1 << (bitindex)));
+  printf("blockoff:%d chunkindex:%d bitindex:%d\n",blockoff,chunkindex,bitindex);
+  put_block(bitmapblock,0);
+  return 0;
+}
 int fs_inodedamage(){
-	fprintf(stderr, "fs_inodedamage\n");
-
-	//struct super_block * sp=get_super(fs_m_in.REQ_DEV);
-
-	block_numbers=calloc(9,4);
-	int index=0;
-
-    broken_inodeNumber = fs_m_in.REQ_INODE_NR;
-
-    struct inode * ino = get_inode(fs_m_in.REQ_DEV,broken_inodeNumber);
-
-    int j;
-    for(j=0;j<9;j++){
-        if(ino->i_zone[j]!=0){
-            block_numbers[index] = ino->i_zone[j];
-            ino->i_zone[j] = 0;
-            index++;
-        }
-    }
-    put_inode(ino);
-
-	printf("test: %d, %d, %d\n",block_numbers[0],block_numbers[1],block_numbers[2]);
-	printf("index: %d\n",index);
-
-	fs_m_out.RES_DEV=(int)block_numbers;
-	fs_m_out.RES_NBYTES=index*4;
-
+	// fprintf(stderr, "fs_inodedamage\n");
+  //
+	// //struct super_block * sp=get_super(fs_m_in.REQ_DEV);
+  //
+	// block_numbers=calloc(9,4);
+	// int index=0;
+  //
+  //   broken_inodeNumber = fs_m_in.REQ_INODE_NR;
+  //
+  //   struct inode * ino = get_inode(fs_m_in.REQ_DEV,broken_inodeNumber);
+  //
+  //   int j;
+  //   for(j=0;j<9;j++){
+  //       if(ino->i_zone[j]!=0){
+  //           block_numbers[index] = ino->i_zone[j];
+  //           ino->i_zone[j] = 0;
+  //           index++;
+  //       }
+  //   }
+  //   put_inode(ino);
+  //
+	// printf("test: %d, %d, %d\n",block_numbers[0],block_numbers[1],block_numbers[2]);
+	// printf("index: %d\n",index);
+  //
+	// fs_m_out.RES_DEV=(int)block_numbers;
+	// fs_m_out.RES_NBYTES=index*4;
+  //
 
 	return 0;
 }
 
-
-
-
 int fs_inodefixer(){
-	fprintf(stderr, "fs_inodeFixer\n");
-
-	int index=0;
-
-	printf("test:  %d  %d  \n",block_numbers[0],lost_blocks[0]);
-	broken_inodeNumber = fs_m_in.REQ_INODE_NR;
-	if(broken_inodeNumber==0)return 0;
-
-    struct inode * ino = get_inode(fs_m_in.REQ_DEV,broken_inodeNumber);
-
-    int j;
-    for(j=0;j<7;j++){
-        if(ino->i_zone[j]==0){
-            ino->i_zone[j]= lost_blocks[index] ;
-            index++;
-        }
-    }
-    if(lost_blocks[8]!=0) ino->i_zone[7]=lost_blocks[8];
-    if(lost_blocks[1033]!=0) ino->i_zone[8]=lost_blocks[1033];
-    put_inode(ino);
-
-	printf("done\n");
-	free(lost_blocks);
-	free(block_numbers);
+	// fprintf(stderr, "fs_inodeFixer\n");
+  //
+	// int index=0;
+  //
+	// printf("test:  %d  %d  \n",block_numbers[0],lost_blocks[0]);
+	// broken_inodeNumber = fs_m_in.REQ_INODE_NR;
+	// if(broken_inodeNumber==0)return 0;
+  //
+  //   struct inode * ino = get_inode(fs_m_in.REQ_DEV,broken_inodeNumber);
+  //
+  //   int j;
+  //   for(j=0;j<7;j++){
+  //       if(ino->i_zone[j]==0){
+  //           ino->i_zone[j]= lost_blocks[index] ;
+  //           index++;
+  //       }
+  //   }
+  //   if(lost_blocks[8]!=0) ino->i_zone[7]=lost_blocks[8];
+  //   if(lost_blocks[1033]!=0) ino->i_zone[8]=lost_blocks[1033];
+  //   put_inode(ino);
+  //
+	// printf("done\n");
+	// free(lost_blocks);
+	// free(block_numbers);
 
 	return 0;
 }
