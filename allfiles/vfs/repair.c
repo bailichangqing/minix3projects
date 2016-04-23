@@ -38,7 +38,7 @@ int do_inodemapwalker()
     struct vmnt *vmp;
     char mount_point[21] = {0};
     sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)mount_point,20);
-    printf("the mount_point is :%s\n",mount_point);
+    // printf("the mount_point is :%s\n",mount_point);
 
     for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
     {
@@ -60,7 +60,7 @@ int do_zonemapwalker()
     struct vmnt *vmp;
     char mount_point[21] = {0};
     sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)mount_point,20);
-    printf("the mount_point is :%s\n",mount_point);
+    // printf("the mount_point is :%s\n",mount_point);
 
     for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
     {
@@ -119,7 +119,7 @@ int do_bitmapfixer()
   struct vmnt *vmp;
   char mount_point[21] = {0};
   sys_datacopy(m_in.m_source,(vir_bytes)m_in.m1_p1,SELF,(vir_bytes)mount_point,20);
-  printf("the mount_point is :%s\n",mount_point);
+  // printf("the mount_point is :%s\n",mount_point);
 
   for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
   {
