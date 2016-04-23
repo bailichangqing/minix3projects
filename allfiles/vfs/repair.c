@@ -95,7 +95,11 @@ int do_directorywalker()
 
 int do_bitmapdamager()
 {
-  //m_in.m5_s1 = inodenumber  m_in.m5_s2 = inodezoneflag
+  /*
+  m_in.m5_s1 = inodenumber
+  m_in.m5_s2 = inodezoneflag
+  m_in.m5_i1 = 0 or 1
+  */
   struct vmnt* vmp;
   for(vmp = &vmnt[0];vmp < &vmnt[NR_MNTS];++vmp)
   {
@@ -108,6 +112,7 @@ int do_bitmapdamager()
     m.m9_s1 = vmp->m_dev;
     m.m9_s2 = m_in.m5_s1;
     m.m9_s3 = m_in.m5_s2;
+    m.m9_s4 = m_in.m5_i1;
     return fs_sendrec(vmp->m_fs_e,&m);
   }
   printf("cannot find /home\n");

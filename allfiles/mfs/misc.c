@@ -178,6 +178,7 @@ int fs_bitmapdamager()
   m9_s1:dev
   m9_s2:inodenumber
   m9_s3:inode/zone flag
+  m9_s4:0 or 1
   */
   struct super_block* sp = get_super(fs_m_in.m9_s1);
   int inodezoneflag = fs_m_in.m9_s3 == 0? 0:sp->s_zmap_blocks;
@@ -191,7 +192,14 @@ int fs_bitmapdamager()
   bitchunk_t* mapchunks = (bitchunk_t*)bitmapblock->data;
   int chunkindex = inodenumber / (sizeof(bitchunk_t) * 8);
   int bitindex = inodenumber % (sizeof(bitchunk_t) * 8);
-  mapchunks[chunkindex] &= (~((bitchunk_t)1 << (bitindex)));
+  if(fs_m_in.m9_s4 == 0)
+  {
+    mapchunks[chunkindex] &= (~((bitchunk_t)1 << (bitindex)));
+  }
+  else
+  {
+    mapchunks[chunkindex] |= ((bitchunk_t)1 << (bitindex));
+  }
   printf("blockoff:%d chunkindex:%d bitindex:%d\n",blockoff,chunkindex,bitindex);
   put_block(bitmapblock,0);
   return 0;
@@ -375,4 +383,85 @@ int fs_bitmapfixer()
   {
     return 0;
   }
+}
+
+int fs_dirfixer()
+{
+  // /*
+  // m9_l1 :dev
+  // m9_l2 :inode nunber
+  // */
+  // struct super_block* sp = get_super(fs_m_in.m9_l1);
+  // int i;
+  // for(i = 1;i <= sp->s_ninodes;i++)
+  // {
+  //   struct inode curinode;
+  //   curinode.i_dev = sp->s_dev;
+  //   curinode.i_num = i;
+  //   rw_inode(&curinode,READING);
+  //   if(curinode.i_nlinks == 0)
+  //   {
+  //     continue;
+  //   }
+  //   nlink_t linkcount = 0;
+  //   int k;
+  //   for(k = 1;k <= sp->s_ninodes; k++)
+  //   {
+  //     struct inode testinode;
+  //     testinode.i_dev = sp->s_dev;
+  //     testinode.i_num = k;
+  //     rw_inode(&testinode,READING);
+  //     if(testinode.i_nlinks == 0)
+  //     {
+  //       continue;
+  //     }
+  //     struct inode* inodeptr = NULL;
+  //     while((inpdeptr = get_inode(testinode.i_dev,testinode.i_num)) == NULL)
+  //     {
+  //       ;
+  //     }
+  //     if(S_ISDIR(inodeptr->i_mode))
+  //     {
+  //       if(search_dir(inodeptr,LOOK_UP))
+  //     }
+  //   }
+  // }
+}
+int mysearch(struct inode* inodeptr,int num)
+{
+  // if((ldir_ptr->i_mode & I_TYPE) != I_DIRECTORY)
+  // {
+  //        return 1;
+  // }
+  // unsigned new_slots, old_slots;
+  // register struct buf *bp = NULL;
+  // register struct direct *dp = NULL;
+  // int hit = 0;
+  // off_t pos;
+  // old_slots = (unsigned) (ldir_ptr->i_size/DIR_ENTRY_SIZE);
+  // new_slots = 0;
+  // pos = 0;
+  // for(; pos < ldir_ptr->i_size; pos += ldir_ptr->i_sp->s_block_size)
+  // {
+  //   assert(ldir_ptr->i_dev != NO_DEV);
+  //   bp = get_block_map(ldir_ptr, pos);
+  //   assert(bp != NULL);
+  //   for (dp = &b_dir(bp)[0];
+  //        dp < &b_dir(bp)[NR_DIR_ENTRIES(ldir_ptr->i_sp->s_block_size)];
+  //        dp++)
+  //   {
+  //     if (++new_slots > old_slots)
+  //     {
+  //       break;
+  //     }
+  //     if(dp->mfs_d_ino != NO_ENTRY)
+  //     {
+  //       if(dp->mfs_d_ino == num)
+  //       {
+  //         hit++;
+  //         break;
+  //       }
+  //     }
+  //   }
+  // }
 }

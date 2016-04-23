@@ -15,18 +15,20 @@ int zonemapwalker(char* mount_point){
     m.m1_p1 = mount_point;
     return _syscall(VFS_PROC_NR,109,&m);
 }
-int inodemapdamager(short i)
+int inodemapdamager(short i,int value)
 {
   message m;
   m.m5_s1 = i;
   m.m5_s2 = 0;
+  m.m5_i1 = value > 0? 1 : 0;
   return _syscall(VFS_PROC_NR,105,&m);
 }
-int zonemapdamager(short i)
+int zonemapdamager(short i,int value)
 {
   message m;
   m.m5_s1 = i;
   m.m5_s2 = 1;
+  m.m5_i1 = value > 0? 1 : 0;
   return _syscall(VFS_PROC_NR,105,&m);
 }
 
