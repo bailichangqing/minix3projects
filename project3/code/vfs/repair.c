@@ -22,7 +22,6 @@
 #include <lib.h>
 #include <assert.h>
 #include <string.h>
-
 #include "fproc.h"
 #include "vmnt.h"
 #include "vnode.h"
@@ -44,7 +43,7 @@ int do_inodemapwalker()
     {
       if(strncmp(mount_point,vmp->m_mount_path,21) == 0)
       {
-        // printf("mount point %s\n",vmp->m_mount_path);
+        printf("mount point %s\n",vmp->m_mount_path);
         message m;
         m.m_type = REQ_WALKER;
         m.m9_l1 = vmp->m_dev;
